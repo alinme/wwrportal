@@ -27,7 +27,7 @@ class EnsureSchoolAccess
             return redirect()->route('home');
         }
 
-        if ($user->role === 'school_manager' && $user->school_id !== $school->id) {
+        if ($user->hasRole('school_manager') && $user->school_id !== $school->id) {
             abort(403, __('You do not have access to this school portal.'));
         }
 

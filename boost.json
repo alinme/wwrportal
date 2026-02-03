@@ -1,17 +1,8 @@
 {
     "agents": [
-        "cursor",
-        "opencode",
-        "gemini"
+        "cursor"
     ],
-    "guidelines": true,
-    "herd_mcp": false,
+    "herd_mcp": true,
     "mcp": true,
-    "sail": false,
-    "skills": [
-        "fluxui-development",
-        "livewire-development",
-        "pest-testing",
-        "tailwindcss-development"
-    ]
+    "sail": false
 }

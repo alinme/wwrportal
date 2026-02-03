@@ -33,9 +33,13 @@ class MagicLinkController extends Controller
             $user->update(['school_id' => $school->id]);
         }
 
+        if (! $user->hasRole('school_manager')) {
+            $user->assignRole('school_manager');
+        }
+
         // If we want to strictly enforce scope, we might need a custom guard or middleware
         // For now, we rely on the route check and user role
-        
+
         Auth::login($user);
 
         return redirect()->route('school.dashboard', $school);

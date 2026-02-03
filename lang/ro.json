@@ -20,6 +20,11 @@
     "Contract": "Contract",
     "Copy Link": "Copiază link",
     "Copy Magic Link": "Copiază link magic",
+    "Contact Person": "Persoană de contact",
+    "Contact Phone": "Telefon contact",
+    "Person to contact": "Persoana de contact",
+    "Phone number": "Număr de telefon",
+    "Educator phone number": "Telefon educator",
     "CUI": "CUI",
     "CUI: ": "CUI: ",
     "Dashboard": "Dashboard",
@@ -79,5 +84,12 @@
     "Educators will set the location in the portal.": "Educatorii vor seta locația în portal.",
     "Ready": "Pregătit",
     "Empty": "Gol",
-    "No school coordinates. Add latitude/longitude to schools to display them on the map.": "Nicio coordonată de școală. Adăugați latitudine/longitudine la școli pentru a le afișa pe hartă."
+    "No school coordinates. Add latitude/longitude to schools to display them on the map.": "Nicio coordonată de școală. Adăugați latitudine/longitudine la școli pentru a le afișa pe hartă.",
+    "You do not have access to any school portal.": "Nu aveți acces la niciun portal de școală.",
+    "You do not have access to the admin area.": "Nu aveți acces la zona de administrare.",
+    "Log Out": "Deconectare",
+    "Generate Table": "Generează tabelul",
+    "Regenerate Codes": "Regenerează codurile",
+    "Profile Settings": "Setări profil",
+    "Settings": "Setări"
 }
