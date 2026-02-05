@@ -1,0 +1,93 @@
+<style>
+body { font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif, dejavuserif, freeserif, liberationserif, Georgia, serif; font-size: 10pt; line-height: 1.15; margin: 0; padding: 12px 0; color: #000; }
+.name-font { font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif, dejavuserif, freeserif, liberationserif, Georgia, serif; }
+h1 { font-size: 10pt; text-align: center; margin: 0 0 6px 0; font-weight: bold; }
+p { margin: 0 0 4px 0; text-align: justify; }
+.indent { text-indent: 28pt; }
+.indent2 { text-indent: 22pt; }
+.bullet::before { content: "✓ "; font-weight: bold; }
+b, strong { font-weight: bold; }
+i, em { font-style: italic; }
+u { text-decoration: underline; }
+a { color: #0563C1; text-decoration: underline; }
+.checkbox-row { margin-left: 28pt; margin-right: 28pt; margin-bottom: 4px; width: 100%; border: none; border-collapse: collapse; }
+.checkbox-row td { border: none; padding: 0; vertical-align: top; }
+.checkbox-row td:last-child { text-align: right; }
+.cb-box-wrap { border-collapse: collapse; margin-right: 6px; }
+.cb-box-wrap td { border: 1pt solid #000; width: 12pt; height: 12pt; padding: 0; line-height: 0; font-size: 0; }
+</style>
+
+<h1>CONSIMȚĂMÂNT PRIVIND PRELUCRAREA DATELOR CU CARACTER PERSONAL ȘI ACORD PRIVIND UTILIZAREA IMAGINII</h1>
+
+<p class="indent2">Subsemnatul(a) <strong class="name-font">{{ $parent_name }}</strong>, domiciliat(ă) în localitatea <strong>{{ $parent_locality }}</strong>, jud. <strong>{{ $parent_county }}</strong>, născut în data <strong>{{ $parent_birth_date }}</strong>, având calitatea de părinte/tutore/reprezentant legal (nedecăzut din drepturi) al minorului/minorei/minorilor <strong class="name-font">{{ $child_name }}</strong> <i>(numele și prenumele copiilor preșcolari care primesc „Ghiozdănel cu viitor”), născut/ă/ți la data/datele <strong>{{ $child_birth_date }}</strong></i> preșcolar/ă/i în cadrul unității școlare <strong>{{ $structure_name }}</strong>, grupa/grupele <strong>{{ $group_name }}</strong>, în calitate de <b>Participant/Participanți</b> în cadrul proiectului <b>„Start în educație”,</b></p>
+
+<p class="indent"><b>1.</b> <b>Declar că am fost informat cu privire la următoarele:</b></p>
+
+<p>Proiectul <b><i>START în EDUCAȚIE</i></b> este implementat de <b><i>Fundația World Vision România</i></b>, cu sediul în București, Strada Rotașului, nr. 7, sector 1, în parteneriat cu școala <i><strong>{{ $school_name }}</strong></i> (Partener instituțional) și este finanțat de <b><i>Fundația OMV Petrom</i></b>. Prin intermediul acestui proiect ne dorim să fim alături de părinți, educatori și preșcolari în primii pași pe care aceștia îi fac în <i>EDUCAȚIE</i>.</p>
+
+<p class="indent bullet">Pentru a putea realiza activitățile proiectului este necesar ca noi, <b><i>Fundația World Vision România</i></b> <i>(în calitate de Operator de date cu caracter personal, denumit în continuare <b>Fundația</b> sau <b>Operatorul</b>)</i>, alături de Partenerul nostru instituțional mai sus menționat <i>(în calitate de persoană împuternicită, denumită în continuare <b>Partener instituțional</b>)</i>, să colectăm și să prelucrăm date cu caracter personal ale dumneavoastră și ale copiilor care participă la proiect, după cum urmează:</p>
+
+<p class="indent">a) <b>datele dumneavoastră de identificare (numele, prenumele, data nașterii, localitatea și județul de domiciliu) și semnătura:</b> acestea sunt necesare pentru a vă putea identifica în calitate de părinte/tutore al copilului pentru care vă exprimați consimțământul prin prezentul document. Totodată, în cazul participării la activitățile de tip Școala Părinților sau primirii Ghidului părinților vom solicita numele, prenumele și semnătura dumneavoastră pe lista de prezență/distribuție.</p>
+
+<p class="indent">b) <b>datele dumneavoastră de contact (număr de telefon, adresă de email)</b> pentru a vă putea transmite informații privind activitățile derulate în cadrul proiectului și a răspunde la eventuale solicitări.</p>
+
+<p class="indent">c) <b>datele de identificare ale copilului sau copiilor dumneavoastră</b> care participă în cadrul proiectului: numele, prenumele, data nașterii, localitatea/județul de domiciliu, școala, grupa. Aceste date le vom solicita prin prezentul document și prin listele de distribuție bunuri, fiind necesare pentru implementarea activităților și menținerea evidenței beneficiilor acordate.</p>
+
+<p class="indent">d) <b>date privind statutul socio economic și familial, cunoștințe, opinii, atitudini și comportamente, colectate prin intermediul</b></p>
+
+<p class="indent">chestionarelor, pentru a identifica nevoia de sprijin pentru educația timpurie și pentru acordarea de kituri educaționale, pentru furnizarea de consiliere parentală și pentru cursuri adresate educatorilor respectiv pentru măsurarea impactului intervențiilor din proiect. Toate informațiile sunt strict confidențiale. Specialiștii noștri le vor analiza și vor prezenta rezultatele statistic și anonim, numărând câte persoane au o părere sau alta, fără să fie menționate date de identificare.</p>
+
+<p class="indent">e) <b>imaginea și vocea</b> dumneavoastră sau ale copiilor, din fotografii sau mărturii scrise, respectiv înregistrări audio-video ale cursurilor cu părinții sau ale altor activități derulate, prelucrate în materiale de comunicare și de interes public, cu scopul realizării de acțiuni de informare/conștientizare/educare a publicului privind importanța educației timpurii și promovării proiectului. Materialele de comunicare și cele de interes public/informative/educaționale realizate de către <i>Operator</i> vor fi comunicate, cu titlu gratuit, către <i>Membrii parteneriatului</i>, către <i>Fundația OMV Petrom</i>, către toate companiile din grupul OMV și către publicul larg, prin instrumentele și canalele de comunicare internă și externă: electronice (ex: pe paginile de Intranet, blog, anunțuri prin email, paginile de <i>Facebook, LinkedIn, Instagram, Twitter</i> și <i>Youtube</i> ale Operatorului sau Membrilor parteneriatului, ale Fundației OMV Petrom și ale companiilor din grupul OMV sau pe monitoare TV aflate la locațiile entităților mai sus menționate, etc.) sau tipărite (ex: reviste, broșuri, etc.).</p>
+
+<p class="indent bullet">Datele cu caracter personal sunt prelucrate doar în scopul implementării și promovării proiectului <b>START în EDUCAȚIE</b>, având la bază temeiurile legale conform Regulamentului (UE) 2016/679 respectiv:</p>
+
+<p class="indent">- consimțământul dumneavoastră (art. 6 alin. 1 lit. a),</p>
+
+<p class="indent">- pentru a ne îndeplini obligațiile legale, în special în domeniul financiar-contabil, privind gestionarea fondurilor (art. 6 alin. 1 lit. c),</p>
+
+<p class="indent">- în interesul legitim al <b>Operatorilor</b>, acest interes legitim constând în îndeplinirea obligațiilor prevăzute în contractul de finanțare al proiectului, soluționarea în mod adecvat a litigiilor, dacă este cazul, precum și în scopuri statistice pentru fundamentarea de noi proiecte (alin. 1 lit. f)</p>
+
+<p class="indent bullet"><b>Datele cu caracter personal le vom colecta doar direct de la dumneavoastră, în calitate de părinte/tutore.</b></p>
+
+<p class="indent bullet"><b>Participarea în cadrul proiectului nu implică realizarea de profiluri având la bază procese decizionale automate, orice analize asupra eligibilității în cadrul proiectului urmând a fi realizate de personal specializat.</b></p>
+
+<p class="indent bullet"><b>Accesul</b> la datele cu caracter personal este permis doar angajaților <b><i>Operatorului</i></b> <i>sau</i> <b><i>Partenerului instituțional</i></b> care gestionează implementarea proiectului, doar pentru acele date necesare implementării proiectului. Aceste date vă pot fi comunicate dumneavoastră, pot fi dezvăluite <i>Fundației OMV Petrom</i>, cu ocazia unor eventuale verificări întreprinse în calitate de finanțator al proiectului sau altor instituții abilitate, cu atribuții de verificare, pentru monitorizarea îndeplinirii activităților și a modului de utilizare a fondurilor. Materialele de comunicare/promovare și cele de interes public/informative sau educaționale, ce includ fotografii și înregistrări video-audio din timpul participării la activități/mărturii scrise, sunt difuzate către: Partener, firme specializate care asistă <b>Operatorul</b> în realizarea campaniilor de comunicare/promovare, Fundația OMV Petrom, societățile de la nivelul Grupului OMV care administrează instrumentele electronice de comunicare internă, precum și publicului larg prin publicarea acestor materiale, în format electronic sau tipărit, pe canalele mai sus menționate. Informații suplimentare despre modul în care Fundația OMV Petrom prelucrează datele persoanelor beneficiare ale proiectelor finanțate de aceasta se pot regăsi și pe web-site-ul Fundației OMV PETROM în secțiunea Politica de confidențialitate la următorul link: <a href="https://fundatiaomvpetrom.ro/politica-confidentialitate/">https://fundatiaomvpetrom.ro/politica-confidentialitate/</a>.</p>
+<!----- END PAGE ----->
+<!----- START PAGE ----->
+<p class="indent bullet">Datele dumneavoastră cu caracter personal <b>nu sunt transferate către state terțe sau către state din Uniunea Europeană.</b></p>
+
+<p class="indent bullet">Datele cu caracter personal vor fi prelucrate pe întreaga perioadă de derulare a proiectului, respectiv până la data de 31.12.2025. Datele vor fi păstrate pentru o perioadă de 5 ani de la data încetării contractului de finanțare, pentru asigurarea sustenabilității proiectului, îndeplinirea obligațiilor legale privind păstrarea documentelor justificative sau pentru situațiile în care va fi necesară apărarea drepturilor și intereselor Parteneriatului în justiție, pe perioadele permise de dispozițiile legale, excepție face situația în care vă veți retrage consimțământul pentru prelucrare și nu există alt temei legal al prelucrării. Materialele de interes public create în scop de informare/conștientizare/educare vor fi menținute pe canalele online și offline pe care au fost distribuite pe o perioadă nelimitată de timp pentru a asigura accesul publicului la informații, precum și sustenabilitatea în îndeplinirea scopului de informare/conștientizare/educare privind importanța educației timpurii sau până la retragerea consimțământului dvs.</p>
+
+<p class="indent bullet">În contextul prelucrării datelor cu caracter personal, beneficiați de drepturile prevăzute de legislație: <b>dreptul de acces</b> (de a obține confirmarea de la <b>Operator</b> sau <b>Partenerul instituțional</b> că datele sunt prelucrate și în acest caz, detalii relevante cu privire la prelucrare), <b>rectificare</b> (în cazul în care datele sunt inexacte), <b>ștergerea datelor</b> (în anumite condiții precum atunci când datele nu mai sunt necesare), <b>retragerea consimțământului atunci când acesta a fost acordat</b>, fără a afecta însă legalitatea prelucrării anterior efectuate, <b>opoziție</b> (de a vă opune prelucrării în condițiile legislației aplicabile – Regulamentul General privind Protecția Datelor), <b>restricționarea prelucrării</b> (în anumite cazuri precum atunci când susțineți faptul că datele sunt inexacte) și <b>portabilitate</b> (de a primi datele cu caracter personal pe care le-ați furnizat anterior într-un format structurat, comun utilizat și care poate fi citit automat și de a solicita transmiterea acestor date către un alt Operator). Totodată, aveți dreptul de <b>a vă adresa cu o plângere autorității relevante de protecția datelor (ANSPDCP)</b> (<a href="http://www.dataprotection.ro">www.dataprotection.ro</a>) și instanțelor de judecată. Mai multe informații referitoare la drepturile privind protecția datelor cu caracter personal puteți obține consultând secțiunea Protecția Datelor pe paginile de Internet ale <b><i>Fundației World Vision România.</i></b> Orice solicitare privind exercitarea drepturilor sau întrebări privind protecția datelor le puteți adresa Responsabililor cu Protecția Datelor la adresa de e-mail <a href="mailto:gdpr_wvromania@wvi.org">gdpr_wvromania@wvi.org</a> sau prin scrisoare la adresa sediului Fundației din București, Strada Rotașului, nr. 7, Sector 1.</p>
+
+<p class="indent bullet"><b>Retragerea consimțământului</b> se va face prin transmiterea unei solicitări la adresa de e-mail <a href="mailto:gdpr_wvromania@wvi.org">gdpr_wvromania@wvi.org</a> sau prin scrisoare la adresa sediului Fundației menționată mai sus. Din momentul în care vă retrageți consimțământul, datele cu caracter personal prelucrate în baza acestuia nu vor fi utilizate, fără a fi afectată prelucrarea realizată până la data retragerii acestuia. Datele cu caracter personal vor fi șterse/distruse la expirarea termenului de prelucrare și/sau la data retragerii consimțământului, dacă nu există alt temei legal pentru prelucrarea acestora. Menționăm că materialele pe care le-am adus la cunoștința publicului în cadrul campaniilor de promovare, pot fi retrase de pe canalele proprii ale <b><i>Operatorului, ale Partenerului instituțional sau Finanțatorului</i></b>, în funcție de caz, însă odată ce materialele au fost făcute publice, nu avem control asupra modului în care acestea sunt ulterior distribuite în mediul online sau offline și folosite de alte entități sau persoane.</p>
+
+<p class="indent"><b>2.</b> <b>Îmi exprim consimțământul în <u>mod expres și neechivoc</u> cu privire la următoarele:</b></p>
+
+<p class="indent bullet">Sunt de acord cu prelucrarea datelor de identificare ale mele și ale copilului/copiilor menționați în prezentul Consimțământ, a datelor de contact și a informațiilor privind participarea la activități și beneficiile acordate, înțelegând că aceste date sunt necesare pentru implementarea proiectului, în sensul menținerii evidenței participării la activități și a beneficiilor acordate grupului țintă.</p>
+
+<table class="checkbox-row"><tr><td><table class="cb-box-wrap"><tr><td>&#160;</td></tr></table> Da, îmi exprim consimțământul</td><td><table class="cb-box-wrap"><tr><td>&#160;</td></tr></table> Nu, nu sunt de acord</td></tr></table>
+
+<p class="indent bullet">Sunt de acord cu prelucrarea unor date precum statutul socio-economic și familial, cunoștințe, opinii, atitudini și comportamente, colectate prin intermediul chestionarelor în scopul analizei nevoilor, respectiv a măsurării impactului proiectului. Aceste date sunt strict confidențiale, fiind publicate doar în urma prelucrării statistice și anonimizării.</p>
+
+<table class="checkbox-row"><tr><td><table class="cb-box-wrap"><tr><td>&#160;</td></tr></table> Da, îmi exprim consimțământul</td><td><table class="cb-box-wrap"><tr><td>&#160;</td></tr></table> Nu, nu sunt de acord</td></tr></table>
+
+<p class="indent bullet">Sunt de acord cu prelucrarea, fără vreo remunerație pentru mine, <b>a imaginii, vocii, precum și a altor date cu caracter personal cuprinse în mărturii scrise, înregistrări audio-video sau fotografii realizate în timpul participării părintelui/tutorului sau a minorului/minorei/minorilor la activitățile desfășurate în cadrul proiectului în vederea promovării interne și publice a proiectului, precum și în scopul realizării de materiale de interes public pentru informarea/conștientizarea/educarea publicului larg ce implică comunicarea materialelor realizate către</b>: angajații Fundației, către Fundația OMV Petrom și angajații acesteia, către toate companiile din grupul OMV și angajații acestora și către publicul larg, prin instrumentele și canalele de comunicare internă și externă: <i>electronice (ex: pe paginile de Intranet, blog, anunțuri prin email, paginile de Facebook, LinkedIn, Instagram, Twitter și Youtube ale Operatorilor, ale Fundației OMV Petrom și ale companiilor din grupul OMV sau pe monitoare TV aflate la locațiile entităților mai sus menționate, etc.) sau tipărite (ex: reviste interne, afișe, broșuri, pliante, etc.)</i>, fără ca pentru acestea să am pretenții financiare ori de altă natură din partea Fundației World Vision România sau a Fundației OMV Petrom, ori din partea oricărui colaborator al acestora, implicat direct sau indirect în producerea, editarea și transmiterea materialelor de comunicare electronice sau tipărite. De asemenea, sunt de acord ca, în scopul realizării materialelor de comunicare internă și externă, ce includ imaginea și vocea, fotografiile și înregistrările audio-video să fie editate (scurtare/crop fotografie/asocierea imaginii cu text ce poate reprezenta descrieri, prezentări, informări, opinii etc. necesare scopului de comunicare internă și externă), fără a aduce prejudicii scopului inițial. Sunt de acord ca materialele de interes public create în scop de informare/conștientizare/educare să fie menținute pe canalele online și offline de mai sus, pe o perioadă nelimitată de timp.</p>
+
+<table class="checkbox-row"><tr><td><table class="cb-box-wrap"><tr><td>&#160;</td></tr></table> Da, îmi exprim consimțământul</td><td><table class="cb-box-wrap"><tr><td>&#160;</td></tr></table> Nu, nu sunt de acord</td></tr></table>
+
+<p>Neacordarea consimțământului pentru completarea chestionarelor, parte a cercetării sociale sau pentru realizarea și diseminarea publică a materialelor de promovare/de interes public/informare/conștientizare/educare <b><u>NU</u></b> afectează calitatea de participant a minorului/minorei/minorilor sau a adultului la activitățile proiectului sau acordarea beneficiilor prevăzute în proiect. Mai multe informații puteți găsi pe pagina: <a href="https://bit.ly/infogdpr">bit.ly/infogdpr</a>.</p>
+
+<table style="width: 100%; border: none; border-collapse: collapse; margin-top: 12px;">
+  <tr>
+    <td style="border: none; padding: 0; vertical-align: top; width: 75%;">
+      <p class="indent" style="margin-top: 0; margin-bottom: 14px;">Semnătura: _________________________________________</p>
+      <p class="indent" style="margin-bottom: 14px;">Data: _________________________________________</p>
+    </td>
+    @if(!empty($qr_src))
+    <td style="border: none; padding: 0; vertical-align: middle; text-align: right; width: 25%;">
+      <img src="{{ $qr_src }}" alt="QR" style="width: 55px; height: 55px;" />
+    </td>
+    @endif
+  </tr>
+</table>

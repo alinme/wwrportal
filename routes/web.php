@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('/list-template', function () {
+    return view('list-template');
+})->name('list-template');
+
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
@@ -27,6 +31,8 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureSchoolAccess::
     Route::get('/docs/contract', [App\Http\Controllers\SchoolDocsController::class, 'downloadContract'])->name('docs.contract');
     Route::get('/docs/annex', [App\Http\Controllers\SchoolDocsController::class, 'downloadAnnex'])->name('docs.annex');
     Route::get('/docs/gdpr', [App\Http\Controllers\SchoolDocsController::class, 'downloadGdpr'])->name('docs.gdpr');
+    Route::get('/docs/gdpr/child/{child}', [App\Http\Controllers\SchoolDocsController::class, 'downloadGdprChild'])->name('docs.gdpr.child');
+    Route::get('/docs/gdpr/child/{child}/test', [App\Http\Controllers\SchoolDocsController::class, 'downloadGdprChildTest'])->name('docs.gdpr.child.test');
     Route::get('/group/{group}/distribution-table', [App\Http\Controllers\SchoolDocsController::class, 'downloadGroupDistributionTable'])->name('docs.group.distribution');
 });
 

@@ -3,35 +3,111 @@
 namespace App\Services;
 
 use App\Models\Campaign;
+use App\Models\Child;
 use App\Models\Group;
 use App\Models\School;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
 use PhpOffice\PhpWord\TemplateProcessor;
 
 class PdfGeneratorService
 {
-    protected function createMpdf(): Mpdf
+    /** Custom fonts directory: place Cambria.ttf and optional NamesFont.ttf here for GDPR PDFs. */
+    protected const FONT_DIR = 'app/fonts';
+
+    /** Return the first font filename that exists in the directory (checks actual filesystem). */
+    protected function findFontFile(string $fontDir, array $candidates): ?string
+    {
+        foreach ($candidates as $name) {
+            if (file_exists($fontDir.\DIRECTORY_SEPARATOR.$name)) {
+                return $name;
+            }
+        }
+
+        return null;
+    }
+
+    protected function createMpdf(array $options = []): Mpdf
     {
         $tmpDir = storage_path('app/tmp');
         if (! is_dir($tmpDir)) {
             mkdir($tmpDir, 0755, true);
         }
 
-        return new Mpdf([
+        $config = [
             'mode' => 'utf-8',
             'format' => 'A4',
             'tempDir' => $tmpDir,
-            'default_font' => 'dejavusans',
-        ]);
+            'margin_left' => 8,
+            'margin_right' => 8,
+            'margin_top' => 8,
+            'margin_bottom' => 8,
+            'margin_header' => 8,
+            'margin_footer' => 8
+        ];
+
+        if (! empty($options['gdpr_fonts'])) {
+            $config = array_merge($config, $this->getGdprFontConfig());
+        }
+        if (isset($options['format'])) {
+            $config['format'] = $options['format'];
+        }
+
+        return new Mpdf($config);
+    }
+
+    /**
+     * Font config for GDPR PDFs: Cambria for body, optional separate font for parent/child names.
+     * Place TTF files in storage/app/fonts/:
+     *   - Cambria.ttf (and optionally Cambria-Bold.ttf) for main text
+     *   - NamesFont.ttf for parent/child names only (any name you use in the template as font-family)
+     */
+    protected function getGdprFontConfig(): array
+    {
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables)->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'] ?? [];
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables)->getDefaults();
+        $fontdata = $defaultFontConfig['fontdata'] ?? [];
+        $defaultFont = 'Cambria';
+
+        $fontDir = storage_path(self::FONT_DIR);
+        if (is_dir($fontDir)) {
+            $fontDirs = array_merge($fontDirs, [$fontDir]);
+
+            $cambriaR = $this->findFontFile($fontDir, ['Cambria.ttf']);
+            if ($cambriaR) {
+                $fontdata['cambria'] = [
+                    'R' => $this->findFontFile($fontDir, ['Cambria.ttf']),
+                ];
+                // Required when a font file is a TrueType Collection (TTC). Only set for styles that use the same file as R.
+                $ttcIds = ['R' => 0];
+                $fontdata['Cambria']['TTCfontID'] = $ttcIds;
+                $defaultFont = 'Cambria';
+            }
+
+            $namesR = $this->findFontFile($fontDir, ['NamesFont.ttf', 'namesfont.ttf']);
+            if ($namesR) {
+                $fontdata['namesfont'] = [
+                    'R' => $namesR,
+                    'B' => $this->findFontFile($fontDir, ['NamesFont-Bold.ttf', 'namesfont-bold.ttf']) ?: $namesR,
+                ];
+            }
+        }
+
+        return [
+            'fontDir' => $fontDirs,
+            'fontdata' => $fontdata,
+            'default_font' => $defaultFont,
+        ];
     }
 
     public function generateContract(School $school, Campaign $campaign)
     {
         $mpdf = $this->createMpdf();
-        
+
         $templatePath = storage_path('app/templates/contract_template.pdf');
-        
+
         if (file_exists($templatePath)) {
             $pagecount = $mpdf->SetSourceFile($templatePath);
             $tplId = $mpdf->ImportPage(1);
@@ -45,7 +121,7 @@ class PdfGeneratorService
         $mpdf->SetFontSize(12);
         $mpdf->WriteText(50, 50, $school->official_name);
         $mpdf->WriteText(50, 60, $campaign->name);
-        
+
         return $mpdf->Output('', 'S');
     }
 
@@ -67,9 +143,9 @@ class PdfGeneratorService
     public function generateAnnex(School $school, Campaign $campaign)
     {
         $mpdf = $this->createMpdf();
-        
+
         $templatePath = storage_path('app/templates/annex_template.pdf');
-        
+
         if (file_exists($templatePath)) {
             $pagecount = $mpdf->SetSourceFile($templatePath);
             $tplId = $mpdf->ImportPage(1);
@@ -101,32 +177,20 @@ class PdfGeneratorService
                 </tr>';
             }
         }
-        
+
         $html .= '</tbody></table>';
-        
+
         $mpdf->WriteHTML($html);
 
         return $mpdf->Output('', 'S');
     }
 
     /**
-     * Generate distribution table for a single group (child, parent, signature).
-     * format: 'pdf' (default) or 'docx'. DOCX uses Word template if present.
+     * Generate distribution table for a single group (child, parent, signature) as PDF.
      * @return array{content: string, mime: string, extension: string}
      */
-    public function generateGroupDistributionTable(Group $group, string $format = 'pdf'): array
+    public function generateGroupDistributionTable(Group $group): array
     {
-        if ($format === 'docx') {
-            $templatePath = storage_path('app/templates/distribution_table_template.docx');
-            if (file_exists($templatePath)) {
-                return [
-                    'content' => $this->generateFromWordTemplate($group, $templatePath),
-                    'mime' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    'extension' => 'docx',
-                ];
-            }
-        }
-
         return [
             'content' => $this->generateGroupDistributionTablePdf($group),
             'mime' => 'application/pdf',
@@ -136,50 +200,62 @@ class PdfGeneratorService
 
     protected function generateGroupDistributionTablePdf(Group $group): string
     {
-        $mpdf = $this->createMpdf();
+        $mpdf = $this->createMpdf(['format' => 'A4-L']);
 
         $school = $group->structure->school;
         $structure = $group->structure;
+        $campaign = $school->campaign;
 
-        $html = '
-        <style>
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid black; padding: 8px; text-align: left; }
-            th { background: #f3f4f6; }
-        </style>
-        <h2>' . htmlspecialchars($school->official_name) . '</h2>
-        <p><strong>' . htmlspecialchars($structure->name) . '</strong> – ' . htmlspecialchars($group->name) . ' (' . htmlspecialchars($group->educator_name) . ')</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nr.</th>
-                    <th>Copil</th>
-                    <th>Părinte/Tutore</th>
-                    <th>Semnătură</th>
-                </tr>
-            </thead>
-            <tbody>';
+        $facilitator = $campaign->facilitator_name ?? $group->educator_name ?? '';
+        $distribution_date = $campaign->month_year_suffix ?? now()->format('d.m.Y');
+        // Schools table: state = Județ (county), city = Oraș/Comună; structures have address only
+        $state_county = $school->state ?? '';
+        $city = $school->city ?? '';
+        $address = $structure->address ?? $school->address ?? '';
 
+        $rows = [];
         $i = 1;
         foreach ($group->children as $child) {
-            $html .= '<tr>
-                <td>' . $i++ . '</td>
-                <td>' . htmlspecialchars($child->child_full_name) . '</td>
-                <td>' . htmlspecialchars($child->parent_full_name) . '</td>
-                <td></td>
-            </tr>';
+            $rows[] = [
+                'number' => $i++,
+                'child_name' => $child->child_full_name ?? '',
+                'parent_name' => $child->parent_full_name ?? '',
+            ];
+        }
+        $emptyRows = max(0, 10 - count($rows));
+        for ($j = 0; $j < $emptyRows; $j++) {
+            $rows[] = [
+                'number' => $i++,
+                'child_name' => '',
+                'parent_name' => '',
+            ];
+        }
+        if (empty($rows)) {
+            $rows[] = ['number' => 1, 'child_name' => '', 'parent_name' => ''];
+            $i = 2;
+        }
+        // Always add one full page of empty rows for future handwritten additions (A4-L ~20 rows per page)
+        $emptyRowsPerPage = 20;
+        for ($j = 0; $j < $emptyRowsPerPage; $j++) {
+            $rows[] = [
+                'number' => $i++,
+                'child_name' => '',
+                'parent_name' => '',
+            ];
         }
 
-        for ($j = 0; $j < 10; $j++) {
-            $html .= '<tr>
-                <td>' . $i++ . '</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>';
-        }
-
-        $html .= '</tbody></table>';
+        $html = View::make('list-template', [
+            'school_name' => $school->official_name ?? '',
+            'structure_name' => ($structure->same_location_as_school ?? false) ? '' : ($structure->name ?? ''),
+            'group_name' => $group->name ?? '',
+            'educator_name' => $group->educator_name ?? '',
+            'state_county' => $state_county,
+            'city' => $city,
+            'address' => $address,
+            'facilitator' => $facilitator,
+            'distribution_date' => $distribution_date,
+            'rows' => $rows,
+        ])->render();
 
         $mpdf->WriteHTML($html);
 
@@ -226,44 +302,60 @@ class PdfGeneratorService
 
     /**
      * Generate GDPR consent form(s). One page per child.
-     * Only placeholders for data we know: school name, structure, group, educator, child name, parent name (optional), facilitator, month_year.
-     * No birth date, no address placeholders.
+     * Uses resources/views/gdpr-template.blade.php. QR image from storage/app/templates/qr.png if present.
      *
      * @param  iterable<\App\Models\Child>  $children
      */
     public function generateGdpr(School $school, Campaign $campaign, iterable $children, bool $withParentNames = true): string
     {
-        $templatePath = storage_path('app/templates/gdpr.html');
         $childrenArray = is_array($children) ? $children : iterator_to_array($children);
 
-        if (! file_exists($templatePath) || empty($childrenArray)) {
+        // Only process actual Child models. If $children was a string (e.g. wrong arg), iterating gives one char per "child" = millions of pages.
+        $childrenArray = array_values(array_filter($childrenArray, fn ($c) => $c instanceof Child));
+        $maxPages = 5000;
+        if (count($childrenArray) > $maxPages) {
+            $childrenArray = array_slice($childrenArray, 0, $maxPages);
+        }
+
+        if (empty($childrenArray)) {
             return $this->generateGdprFallback($school, $campaign, $childrenArray, $withParentNames);
         }
 
-        $mpdf = $this->createMpdf();
-        $facilitator = $campaign->facilitator_name ?? '';
-        $monthYear = $campaign->month_year_suffix ?? '';
+        $mpdf = $this->createMpdf(['gdpr_fonts' => true]);
+
+        // QR image: same folder as former template (storage/app/templates/qr.png), embedded as base64 for mPDF
+        $qrPath = storage_path('app/templates/qr.png');
+        $qrSrc = '';
+        if (is_file($qrPath)) {
+            $qrSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($qrPath));
+        }
 
         foreach ($childrenArray as $index => $child) {
             $group = $child->group;
             $structure = $group->structure;
 
-            $html = file_get_contents($templatePath);
+            $parentName = $withParentNames ? ($child->parent_full_name ?? '') : '_________________________';
+            $parentLocality = $child->parent_locality ?? '_________________________';
+            $parentCounty = $child->parent_county ?? '_________________________';
+            $parentBirthDate = $child->parent_birth_date
+                ? $child->parent_birth_date->format('d.m.Y')
+                : '_________________________';
+            $childBirthDate = $child->child_birth_date
+                ? $child->child_birth_date->format('d.m.Y')
+                : '_________________________';
 
-            $replacements = [
-                '${SCHOOL_NAME}' => $school->official_name,
-                '${STRUCTURE_NAME}' => $structure->name,
-                '${GROUP_NAME}' => $group->name,
-                '${EDUCATOR_NAME}' => $group->educator_name ?? '',
-                '${CHILD_NAME}' => $child->child_full_name,
-                '${PARENT_NAME}' => $withParentNames ? $child->parent_full_name : '_________________________',
-                '${FACILITATOR_NAME}' => $facilitator,
-                '${MONTH_YEAR_SUFFIX}' => $monthYear,
-            ];
-
-            foreach ($replacements as $placeholder => $value) {
-                $html = str_replace($placeholder, htmlspecialchars($value), $html);
-            }
+            $html = View::make('gdpr-template', [
+                'parent_name' => $parentName,
+                'parent_locality' => $parentLocality,
+                'parent_county' => $parentCounty,
+                'parent_birth_date' => $parentBirthDate,
+                'child_name' => $child->child_full_name,
+                'child_birth_date' => $childBirthDate,
+                'school_name' => $school->official_name,
+                'structure_name' => $structure->name,
+                'group_name' => $group->name,
+                'qr_src' => $qrSrc,
+            ])->render();
 
             $mpdf->WriteHTML($html);
             if ($index < count($childrenArray) - 1) {

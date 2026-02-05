@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Child;
 use App\Models\Group;
 use App\Models\School;
 use App\Services\PdfGeneratorService;
+use Illuminate\Support\Str;
 
 class SchoolDocsController extends Controller
 {
@@ -70,13 +72,62 @@ class SchoolDocsController extends Controller
         $children = $school->structures()
             ->with('groups.children')
             ->get()
-            ->flatMap(fn ($s) => $s->groups->flatMap(fn ($g) => $g->children));
+            ->flatMap(fn ($s) => $s->groups->flatMap(fn ($g) => $g->children))
+            ->filter(fn ($c) => $c instanceof Child)
+            ->values();
 
         $pdfContent = $this->pdfService->generateGdpr($school, $campaign, $children, $withParentNames);
 
         $suffix = $withParentNames ? 'cu_nume' : 'fara_nume';
         $filename = 'gdpr_consimtamant_' . $suffix . '_' . now()->format('Y-m-d') . '.pdf';
 
+        $disposition = request()->boolean('preview') ? 'inline' : 'attachment';
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', $disposition . '; filename="' . $filename . '"');
+    }
+
+    /**
+     * Download GDPR consent form for a single child (one parent/kid).
+     */
+    public function downloadGdprChild(School $school, Child $child)
+    {
+        $this->authorizeChildAccess($school, $child);
+
+        $campaign = $school->campaign;
+        if (! $campaign) {
+            abort(404, 'No campaign assigned.');
+        }
+
+        $withParentNames = filter_var(request('with_parent_names', true), FILTER_VALIDATE_BOOLEAN);
+        $pdfContent = $this->pdfService->generateGdpr($school, $campaign, [$child], $withParentNames);
+
+        $slug = Str::slug($child->child_full_name . '_' . $child->parent_full_name);
+        $filename = 'gdpr_' . $slug . '_' . now()->format('Y-m-d') . '.pdf';
+
+        $disposition = request()->boolean('preview') ? 'inline' : 'attachment';
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', $disposition . '; filename="' . $filename . '"');
+    }
+
+    /**
+     * Test: single-child GDPR PDF. Uses same flow as downloadGdprChild (generateGdpr).
+     */
+    public function downloadGdprChildTest(School $school, Child $child)
+    {
+        $campaign = $school->campaign;
+        if (! $campaign) {
+            abort(404, 'No campaign assigned.');
+        }
+        $this->authorizeChildAccess($school, $child);
+
+        $withParentNames = filter_var(request('with_parent_names', true), FILTER_VALIDATE_BOOLEAN);
+        $pdfContent = $this->pdfService->generateGdpr($school, $campaign, [$child], $withParentNames);
+
+        $filename = 'gdpr_test_' . now()->format('Y-m-d') . '.pdf';
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
@@ -86,19 +137,29 @@ class SchoolDocsController extends Controller
     {
         $this->authorizeGroupAccess($school, $group);
 
-        $format = request('format', 'pdf');
-        $result = $this->pdfService->generateGroupDistributionTable($group, $format);
+        $result = $this->pdfService->generateGroupDistributionTable($group);
+        $filename = 'lista_distributie_' . Str::slug($group->name) . '_' . now()->format('Y-m-d') . '.pdf';
 
-        $filename = 'lista_distributie_' . \Illuminate\Support\Str::slug($group->name) . '_' . now()->format('Y-m-d') . '.' . $result['extension'];
+        $disposition = request()->boolean('preview')
+            ? 'inline'
+            : 'attachment';
 
         return response($result['content'])
-            ->header('Content-Type', $result['mime'])
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', $disposition . '; filename="' . $filename . '"');
     }
 
     protected function authorizeGroupAccess(School $school, Group $group): void
     {
         if ($group->structure->school_id !== $school->id) {
+            abort(403);
+        }
+    }
+
+    protected function authorizeChildAccess(School $school, Child $child): void
+    {
+        $child->load('group.structure');
+        if ($child->group->structure->school_id !== $school->id) {
             abort(403);
         }
     }

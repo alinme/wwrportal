@@ -44,11 +44,11 @@
                             <flux:dropdown>
                                 <flux:button size="sm" variant="ghost" icon="document-text"><span class="hidden sm:inline">{{ __('Generate Table') }}</span></flux:button>
                                 <flux:menu>
-                                    <flux:menu.item icon="document-text" href="{{ route('school.docs.group.distribution', [$school, $group]) }}?format=pdf" target="_blank">
-                                        {{ __('PDF') }}
+                                    <flux:menu.item icon="eye" href="{{ route('school.docs.group.distribution', [$school, $group]) }}?preview=1" target="_blank">
+                                        {{ __('Preview') }}
                                     </flux:menu.item>
-                                    <flux:menu.item icon="document" href="{{ route('school.docs.group.distribution', [$school, $group]) }}?format=docx" target="_blank">
-                                        {{ __('Word') }}
+                                    <flux:menu.item icon="arrow-down-tray" href="{{ route('school.docs.group.distribution', [$school, $group]) }}" target="_blank">
+                                        {{ __('Download PDF') }}
                                     </flux:menu.item>
                                 </flux:menu>
                             </flux:dropdown>
@@ -77,6 +77,20 @@
                                     <flux:table.cell>{{ $child->child_full_name }}</flux:table.cell>
                                     <flux:table.cell>{{ $child->parent_full_name }}</flux:table.cell>
                                     <flux:table.cell>
+                                        <flux:dropdown>
+                                            <flux:button size="sm" variant="ghost" icon="shield-check" title="{{ __('GDPR') }}" />
+                                            <flux:menu>
+                                                <flux:menu.item icon="eye" href="{{ route('school.docs.gdpr.child', [$school, $child]) }}?with_parent_names=1&preview=1" target="_blank">
+                                                    {{ __('Preview') }}
+                                                </flux:menu.item>
+                                                <flux:menu.item icon="arrow-down-tray" href="{{ route('school.docs.gdpr.child', [$school, $child]) }}?with_parent_names=1" target="_blank">
+                                                    {{ __('Download') }}
+                                                </flux:menu.item>
+                                                <flux:menu.item icon="share" wire:click="copyGdprShareMessage('{{ $child->id }}')">
+                                                    {{ __('Copy message for parent') }}
+                                                </flux:menu.item>
+                                            </flux:menu>
+                                        </flux:dropdown>
                                         <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editChild('{{ $child->id }}')" title="{{ __('Edit') }}" />
                                         <flux:button size="sm" variant="danger" icon="trash" wire:click="deleteChild('{{ $child->id }}')" wire:confirm="{{ __('Are you sure?') }}" title="{{ __('Delete') }}" />
                                     </flux:table.cell>
@@ -110,15 +124,29 @@
         </form>
     </flux:modal>
 
-    <flux:modal name="structure-location-modal" class="md:max-w-xl">
-        <form wire:submit="saveStructureLocation" class="space-y-6">
+    <flux:modal name="structure-location-modal" class="md:max-w-2xl lg:max-w-4xl">
+        <form wire:submit.prevent class="space-y-6" x-data="{
+            saveLocation() {
+                let lat = null, lng = null;
+                if (typeof window !== 'undefined' && window.__structureMapPosition) {
+                    lat = window.__structureMapPosition.lat;
+                    lng = window.__structureMapPosition.lng;
+                }
+                if (lat == null && $wire.structure_latitude != null) lat = $wire.structure_latitude;
+                if (lng == null && $wire.structure_longitude != null) lng = $wire.structure_longitude;
+                $wire.saveStructureLocation(lat, lng);
+            }
+        }">
             <div>
                 <flux:heading size="lg">{{ __('Set structure location') }}</flux:heading>
                 <flux:subheading>{{ __('You know the exact address. Search or drag the pin on the map.') }}</flux:subheading>
             </div>
 
+            <input type="hidden" wire:model="structure_latitude" />
+            <input type="hidden" wire:model="structure_longitude" />
             <x-address-autocomplete
                 wire:model="structure_address"
+                model="structure_address"
                 :label="__('Address')"
                 :placeholder="__('Start typing address...')"
                 fill-latitude="structure_latitude"
@@ -135,17 +163,25 @@
 
             <div class="flex pt-2">
                 <flux:spacer />
-                <flux:button size="sm" type="submit" variant="primary">{{ __('Save location') }}</flux:button>
+                <flux:button size="sm" type="button" variant="primary" @click="saveLocation()">{{ __('Save location') }}</flux:button>
             </div>
         </form>
     </flux:modal>
 
-    <flux:modal name="add-child-modal" class="md:w-96">
+    <flux:modal name="add-child-modal" class="md:max-w-xl lg:max-w-2xl">
         <form wire:submit.prevent class="space-y-6">
             <flux:heading size="lg">{{ $child_id ? __('Edit Child') : __('Add Child') }}</flux:heading>
 
-            <flux:input wire:model="child_full_name" label="{{ __('Child Name') }}" required description="{{ __('Stored in UPPERCASE.') }}" />
-            <flux:input wire:model="parent_full_name" label="{{ __('Parent Name') }}" required description="{{ __('Stored in UPPERCASE.') }}" />
+            <flux:input wire:model="child_full_name" label="{{ __('Child Name') }}" placeholder="{{ __('e.g. Maria Popescu') }}" required />
+            <flux:input wire:model="parent_full_name" label="{{ __('Parent Name') }}" placeholder="{{ __('e.g. Ion Popescu') }}" required />
+
+            <flux:separator :text="__('Parent details (optional, for GDPR form)')" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <flux:input wire:model="parent_locality" label="{{ __('Locality') }}" placeholder="{{ __('e.g. București') }}" />
+                <flux:input wire:model="parent_county" label="{{ __('County') }}" placeholder="{{ __('e.g. București') }}" />
+                <flux:input wire:model="parent_birth_date" label="{{ __('Parent birth date') }}" type="date" />
+                <flux:input wire:model="child_birth_date" label="{{ __('Child birth date') }}" type="date" />
+            </div>
 
             <div class="flex gap-2">
                 <flux:spacer />
@@ -157,3 +193,14 @@
         </form>
     </flux:modal>
 </div>
+
+@script
+<script>
+    $wire.on('copy-to-clipboard', (event) => {
+        const text = event.text || event.url || '';
+        if (text && navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(text);
+        }
+    });
+</script>
+@endscript

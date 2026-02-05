@@ -17,6 +17,8 @@ class SchoolStructureManager extends Component
 
     public int $target_kits = 0;
 
+    public bool $same_location_as_school = false;
+
     public ?string $structure_id = null;
 
     public function mount(School $school): void
@@ -31,16 +33,29 @@ class SchoolStructureManager extends Component
             'target_kits' => 'required|integer|min:0',
         ]);
 
+        $data = [
+            'school_id' => $this->school->id,
+            'name' => $this->name,
+            'target_kits' => (int) $this->target_kits,
+            'same_location_as_school' => $this->same_location_as_school,
+        ];
+
+        if ($this->same_location_as_school) {
+            $data['address'] = $this->school->address ?? null;
+            $data['latitude'] = $this->school->latitude;
+            $data['longitude'] = $this->school->longitude;
+        } elseif (empty($this->structure_id)) {
+            $data['address'] = $this->school->address ?? '';
+            $data['latitude'] = $this->school->latitude;
+            $data['longitude'] = $this->school->longitude;
+        }
+
         Structure::updateOrCreate(
             ['id' => $this->structure_id],
-            [
-                'school_id' => $this->school->id,
-                'name' => $this->name,
-                'target_kits' => (int) $this->target_kits,
-            ]
+            $data
         );
 
-        $this->reset(['name', 'target_kits', 'structure_id']);
+        $this->reset(['name', 'target_kits', 'same_location_as_school', 'structure_id']);
         Flux::modal('structure-modal')->close();
         Flux::toast(__('Structure saved successfully.'), 'success');
     }
@@ -52,6 +67,7 @@ class SchoolStructureManager extends Component
         $this->structure_id = $structure->id;
         $this->name = $structure->name;
         $this->target_kits = $structure->target_kits ?? 0;
+        $this->same_location_as_school = $structure->same_location_as_school ?? false;
 
         Flux::modal('structure-modal')->show();
     }
@@ -63,10 +79,26 @@ class SchoolStructureManager extends Component
         Flux::toast(__('Structure deleted successfully.'));
     }
 
+    public function copyPortalLink(): void
+    {
+        $url = url()->route('school.access', [$this->school, $this->school->access_token]);
+        $this->dispatch('copy-to-clipboard', url: $url);
+        Flux::toast(__('Portal link copied to clipboard.'), 'success');
+    }
+
     public function render()
     {
+        $structures = $this->school->structures()->latest()->get();
+        $groupsCount = $this->school->groups()->count();
+        $childrenCount = $this->school->groups()->withCount('children')->get()->sum('children_count');
+        $totalTargetKits = $structures->sum('target_kits');
+
         return view('livewire.school-structure-manager', [
-            'structures' => $this->school->structures()->latest()->get(),
+            'structures' => $structures,
+            'structures_count' => $structures->count(),
+            'groups_count' => $groupsCount,
+            'children_count' => $childrenCount,
+            'total_target_kits' => (int) $totalTargetKits,
         ]);
     }
 }

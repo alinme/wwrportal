@@ -18,6 +18,8 @@ class Child extends Model
     {
         return [
             'gdpr_status' => 'boolean',
+            'parent_birth_date' => 'date',
+            'child_birth_date' => 'date',
         ];
     }
 

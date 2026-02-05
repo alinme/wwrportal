@@ -14,6 +14,10 @@ class Structure extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'same_location_as_school' => 'boolean',
+    ];
+
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);

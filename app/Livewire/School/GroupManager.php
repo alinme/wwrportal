@@ -34,6 +34,14 @@ class GroupManager extends Component
 
     public string $parent_full_name = '';
 
+    public ?string $parent_locality = null;
+
+    public ?string $parent_county = null;
+
+    public ?string $parent_birth_date = null;
+
+    public ?string $child_birth_date = null;
+
     public string $structure_address = '';
 
     public ?float $structure_latitude = null;
@@ -104,7 +112,10 @@ class GroupManager extends Component
     {
         $this->active_group_id = $groupId;
         $this->child_id = null;
-        $this->reset(['child_full_name', 'parent_full_name']);
+        $this->reset([
+            'child_full_name', 'parent_full_name',
+            'parent_locality', 'parent_county', 'parent_birth_date', 'child_birth_date',
+        ]);
         Flux::modal('add-child-modal')->show();
     }
 
@@ -116,6 +127,10 @@ class GroupManager extends Component
         $this->active_group_id = $child->group_id;
         $this->child_full_name = $child->child_full_name;
         $this->parent_full_name = $child->parent_full_name;
+        $this->parent_locality = $child->parent_locality;
+        $this->parent_county = $child->parent_county;
+        $this->parent_birth_date = $child->parent_birth_date?->format('Y-m-d');
+        $this->child_birth_date = $child->child_birth_date?->format('Y-m-d');
         Flux::modal('add-child-modal')->show();
     }
 
@@ -129,6 +144,10 @@ class GroupManager extends Component
         $data = [
             'child_full_name' => $this->child_full_name,
             'parent_full_name' => $this->parent_full_name,
+            'parent_locality' => $this->parent_locality ?: null,
+            'parent_county' => $this->parent_county ?: null,
+            'parent_birth_date' => $this->parent_birth_date ?: null,
+            'child_birth_date' => $this->child_birth_date ?: null,
         ];
 
         $wasEdit = (bool) $this->child_id;
@@ -147,7 +166,10 @@ class GroupManager extends Component
             Flux::toast(__('Child added successfully.'), 'success');
         }
 
-        $this->reset(['child_id', 'child_full_name', 'parent_full_name']);
+        $this->reset([
+            'child_id', 'child_full_name', 'parent_full_name',
+            'parent_locality', 'parent_county', 'parent_birth_date', 'child_birth_date',
+        ]);
 
         if ($andAddAnother && ! $wasEdit) {
             Flux::toast(__('Child added. Add another?'), 'success');
@@ -173,16 +195,30 @@ class GroupManager extends Component
         Flux::modal('structure-location-modal')->show();
     }
 
-    public function saveStructureLocation(): void
+    public function copyGdprShareMessage(string $childId): void
+    {
+        $child = Child::whereHas('group', fn ($q) => $q->where('structure_id', $this->structure->id))
+            ->findOrFail($childId);
+
+        $message = __('gdpr_share_message', ['child_name' => $child->child_full_name]);
+
+        $this->dispatch('copy-to-clipboard', text: $message);
+        Flux::toast(__('Message copied. Paste it in WhatsApp or email and attach the GDPR form.'), 'success');
+    }
+
+    public function saveStructureLocation(?float $latitude = null, ?float $longitude = null): void
     {
         $this->validate([
             'structure_address' => 'required|string',
         ]);
 
+        $lat = $latitude ?? $this->structure_latitude;
+        $lng = $longitude ?? $this->structure_longitude;
+
         $this->structure->update([
             'address' => $this->structure_address,
-            'latitude' => $this->structure_latitude,
-            'longitude' => $this->structure_longitude,
+            'latitude' => $lat,
+            'longitude' => $lng,
         ]);
 
         Flux::modal('structure-location-modal')->close();

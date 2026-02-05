@@ -10,17 +10,42 @@
     </div>
 
     <flux:card>
-        <div class="space-y-2">
-            <flux:heading size="lg">{{ $school->official_name }}</flux:heading>
-            <flux:text class="text-zinc-500 dark:text-zinc-400">{{ $school->address }}</flux:text>
-            @if ($school->contact_person || $school->contact_phone)
-                <flux:text class="text-sm">
-                    @if ($school->contact_person){{ $school->contact_person }}@endif
-                    @if ($school->contact_person && $school->contact_phone) · @endif
-                    @if ($school->contact_phone){{ $school->contact_phone }}@endif
-                </flux:text>
-            @endif
-            <flux:text class="text-sm">{{ __('Campaign') }}: {{ $school->campaign?->name }}</flux:text>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="space-y-2">
+                <flux:heading size="lg">{{ $school->official_name }}</flux:heading>
+                <flux:text class="text-zinc-500 dark:text-zinc-400">{{ $school->address }}</flux:text>
+                @if ($school->contact_person || $school->contact_phone)
+                    <flux:text class="text-sm">
+                        @if ($school->contact_person){{ $school->contact_person }}@endif
+                        @if ($school->contact_person && $school->contact_phone) · @endif
+                        @if ($school->contact_phone){{ $school->contact_phone }}@endif
+                    </flux:text>
+                @endif
+                <flux:text class="text-sm">{{ __('Campaign') }}: {{ $school->campaign?->name }}</flux:text>
+            </div>
+            <flux:tooltip content="{{ __('Copy portal link for educators') }}">
+                <flux:button size="sm" variant="primary" icon="link" wire:click="copyPortalLink">
+                    {{ __('Copy portal link') }}
+                </flux:button>
+            </flux:tooltip>
+        </div>
+        <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700 flex flex-wrap gap-4">
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{{ $structures_count }}</span>
+                <span class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Structures') }}</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{{ $groups_count }}</span>
+                <span class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Groups') }}</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{{ $children_count }}</span>
+                <span class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Children') }}</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{{ $total_target_kits }}</span>
+                <span class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Target kits') }}</span>
+            </div>
         </div>
     </flux:card>
 
@@ -36,7 +61,7 @@
             @foreach ($structures as $structure)
                 <flux:table.row :key="$structure->id">
                     <flux:table.cell>{{ $structure->name }}</flux:table.cell>
-                    <flux:table.cell>{{ $structure->address ? Str::limit($structure->address, 50) : '—' }}</flux:table.cell>
+                    <flux:table.cell>{{ $structure->same_location_as_school ? __('Same as school') : ($structure->address ? Str::limit($structure->address, 50) : '—') }}</flux:table.cell>
                     <flux:table.cell>{{ $structure->target_kits ?? 0 }}</flux:table.cell>
                     <flux:table.cell>
                         <flux:dropdown>
@@ -73,6 +98,7 @@
 
             <flux:input wire:model="name" label="{{ __('Name') }}" placeholder="e.g. Grădinița cu Program Prelungit Nr. 4" />
             <flux:input wire:model="target_kits" label="{{ __('Target Kits') }}" type="number" min="0" />
+            <flux:checkbox wire:model="same_location_as_school" label="{{ __('Same location as school') }}" description="{{ __('Use school address; educators do not need to set a separate location.') }}" />
 
             <div class="flex pt-2">
                 <flux:spacer />
@@ -81,3 +107,13 @@
         </form>
     </flux:modal>
 </div>
+
+@script
+<script>
+    $wire.on('copy-to-clipboard', (event) => {
+        if (event.url && navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(event.url);
+        }
+    });
+</script>
+@endscript

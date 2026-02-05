@@ -14,11 +14,17 @@
             <flux:dropdown>
                 <flux:button size="sm" icon="shield-check"><span class="hidden sm:inline">{{ __('GDPR Forms') }}</span></flux:button>
                 <flux:menu>
+                    <flux:menu.item icon="eye" href="{{ route('school.docs.gdpr', $school) }}?with_parent_names=1&preview=1" target="_blank">
+                        {{ __('Preview') }} ({{ __('With parent names') }})
+                    </flux:menu.item>
                     <flux:menu.item icon="user" href="{{ route('school.docs.gdpr', $school) }}?with_parent_names=1" target="_blank">
-                        {{ __('With parent names') }}
+                        {{ __('Download') }} ({{ __('With parent names') }})
+                    </flux:menu.item>
+                    <flux:menu.item icon="eye" href="{{ route('school.docs.gdpr', $school) }}?with_parent_names=0&preview=1" target="_blank">
+                        {{ __('Preview') }} ({{ __('Without parent names (for parents to write)') }})
                     </flux:menu.item>
                     <flux:menu.item icon="pencil-square" href="{{ route('school.docs.gdpr', $school) }}?with_parent_names=0" target="_blank">
-                        {{ __('Without parent names (for parents to write)') }}
+                        {{ __('Download') }} ({{ __('Without parent names (for parents to write)') }})
                     </flux:menu.item>
                 </flux:menu>
             </flux:dropdown>
@@ -41,7 +47,7 @@
                 </div>
                 <flux:text>{{ $structure->address ?: __('Location not set — set it when managing groups') }}</flux:text>
                 <flux:text class="text-sm text-zinc-500">{{ $structureChildrenCount }} / {{ $structureTarget ?: '—' }} {{ __('kits') }}</flux:text>
-                
+
                 <flux:button size="sm" class="w-full" icon="arrow-right" wire:navigate href="{{ route('school.structure', [$school, $structure]) }}">
                     {{ __('Manage Groups') }}
                 </flux:button>
