@@ -15,6 +15,21 @@ class School extends Model
 
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return [
+            'kits_returned' => 'integer',
+            'kits_received_from_return' => 'integer',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (School $school) {
+            $school->users()->update(['school_id' => null]);
+        });
+    }
+
     public function campaign(): BelongsTo
     {
         return $this->belongsTo(Campaign::class);

@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +13,13 @@ class MagicLinkController extends Controller
     {
         if ($school->access_token !== $token) {
             abort(403, 'Invalid access token.');
+        }
+
+        // Admin clicking the link: impersonate instead of logging in as educator
+        if (Auth::check() && Auth::user()->hasRole('admin')) {
+            session(['impersonate_school_id' => $school->id]);
+
+            return redirect()->route('school.dashboard', $school);
         }
 
         $email = "school_{$school->id}@portal.local";
@@ -36,9 +41,6 @@ class MagicLinkController extends Controller
         if (! $user->hasRole('school_manager')) {
             $user->assignRole('school_manager');
         }
-
-        // If we want to strictly enforce scope, we might need a custom guard or middleware
-        // For now, we rely on the route check and user role
 
         Auth::login($user);
 

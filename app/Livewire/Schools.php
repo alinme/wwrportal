@@ -5,8 +5,8 @@ namespace App\Livewire;
 use App\Models\Campaign;
 use App\Models\School;
 use Flux\Flux;
-use Livewire\Component;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 class Schools extends Component
 {
@@ -32,6 +32,8 @@ class Schools extends Component
 
     public $contact_phone = '';
 
+    public $contact_email = '';
+
     public $target_kits = 0;
 
     public $school_id;
@@ -44,7 +46,7 @@ class Schools extends Component
             'campaign_id' => 'required|exists:campaigns,id',
         ]);
 
-        if (!$this->access_token) {
+        if (! $this->access_token) {
             $this->access_token = (string) Str::uuid();
         }
 
@@ -62,11 +64,12 @@ class Schools extends Component
                 'longitude' => $this->longitude ?: null,
                 'contact_person' => $this->contact_person ?: null,
                 'contact_phone' => $this->contact_phone ?: null,
+                'contact_email' => $this->contact_email ?: null,
                 'target_kits' => (int) $this->target_kits,
             ]
         );
 
-        $this->reset(['official_name', 'address', 'city', 'state', 'country', 'campaign_id', 'access_token', 'latitude', 'longitude', 'contact_person', 'contact_phone', 'target_kits', 'school_id']);
+        $this->reset(['official_name', 'address', 'city', 'state', 'country', 'campaign_id', 'access_token', 'latitude', 'longitude', 'contact_person', 'contact_phone', 'contact_email', 'target_kits', 'school_id']);
 
         Flux::modal('school-modal')->close();
         Flux::toast('School saved successfully.', 'success');
@@ -87,6 +90,7 @@ class Schools extends Component
         $this->longitude = $school->longitude ?? '';
         $this->contact_person = $school->contact_person ?? '';
         $this->contact_phone = $school->contact_phone ?? '';
+        $this->contact_email = $school->contact_email ?? '';
         $this->target_kits = $school->target_kits ?? 0;
 
         Flux::modal('school-modal')->show();

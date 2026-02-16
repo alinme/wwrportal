@@ -22,6 +22,12 @@
                     <flux:sidebar.item icon="academic-cap" :href="route('schools')" :current="request()->routeIs('schools')" wire:navigate>
                         {{ __('Schools') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="arrow-up-tray" :href="route('uploads')" :current="request()->routeIs('uploads')" wire:navigate>
+                        {{ __('Uploads') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="users" :href="route('contacts')" :current="request()->routeIs('contacts')" wire:navigate>
+                        {{ __('Contacts') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
 
                 <flux:sidebar.group :heading="__('Settings')" class="grid">

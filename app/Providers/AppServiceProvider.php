@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        // Use local disk for Livewire temp uploads so /uploads Excel import works
+        // when the default filesystem is S3 or another cloud driver.
+        Config::set('livewire.temporary_file_upload.disk', 'local');
     }
 
     protected function configureDefaults(): void

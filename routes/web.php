@@ -14,8 +14,14 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::get('/campaigns', App\Livewire\Campaigns::class)->name('campaigns');
+    Route::get('/campaigns/{campaign}/schools', App\Livewire\CampaignSchools::class)->name('campaigns.schools');
+    Route::get('/campaigns/{campaign}/schools/{school}/structures', App\Livewire\SchoolStructureManager::class)->name('campaigns.schools.structures');
     Route::get('/schools', App\Livewire\Schools::class)->name('schools');
     Route::get('/schools/{school}/structures', App\Livewire\SchoolStructureManager::class)->name('schools.structures');
+    Route::get('/schools/{school}/docs/proces-verbal-retur', [App\Http\Controllers\SchoolDocsController::class, 'downloadProcesVerbalRetur'])->name('schools.docs.proces-verbal-retur');
+    Route::get('/schools/{school}/docs/proces-verbal-primire-din-retur', [App\Http\Controllers\SchoolDocsController::class, 'downloadProcesVerbalPrimireDinRetur'])->name('schools.docs.proces-verbal-primire-din-retur');
+    Route::get('/uploads', App\Livewire\Uploads::class)->name('uploads');
+    Route::get('/contacts', App\Livewire\Contacts::class)->name('contacts');
     Route::get('/settings/foundation', App\Livewire\Settings\FoundationSettings::class)->name('settings.foundation');
 });
 
@@ -23,6 +29,14 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
 Route::get('/access/{school}/{token}', [App\Http\Controllers\MagicLinkController::class, 'login'])
     ->middleware('throttle:10,1')
     ->name('school.access');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/exit-impersonation', function () {
+        session()->forget('impersonate_school_id');
+
+        return redirect()->route('dashboard');
+    })->name('exit-impersonation');
+});
 
 Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureSchoolAccess::class])->prefix('portal/{school}')->as('school.')->group(function () {
     Route::get('/', App\Livewire\School\SchoolDashboard::class)->name('dashboard');

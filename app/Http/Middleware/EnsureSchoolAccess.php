@@ -10,6 +10,7 @@ class EnsureSchoolAccess
 {
     /**
      * Ensure school_manager users can only access their assigned school's portal.
+     * Admins can access when impersonating (session impersonate_school_id).
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
@@ -25,6 +26,16 @@ class EnsureSchoolAccess
 
         if (! $user) {
             return redirect()->route('home');
+        }
+
+        if ($user->hasRole('admin')) {
+            $impersonateId = session('impersonate_school_id');
+            if ($impersonateId && (string) $school->id === (string) $impersonateId) {
+                return $next($request);
+            }
+            session()->forget('impersonate_school_id');
+
+            return redirect()->route('dashboard');
         }
 
         if ($user->hasRole('school_manager') && $user->school_id !== $school->id) {

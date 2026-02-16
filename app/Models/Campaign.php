@@ -12,6 +12,15 @@ class Campaign extends Model
 
     protected $guarded = [];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Campaign $campaign) {
+            $campaign->schools()->each(function (School $school) {
+                $school->delete();
+            });
+        });
+    }
+
     protected function casts(): array
     {
         return [

@@ -22,9 +22,13 @@
             @foreach ($schools as $school)
                 <flux:table.row :key="$school->id">
                     <flux:table.cell>
-                        <flux:link href="{{ route('schools.structures', $school) }}" wire:navigate class="font-medium hover:underline">
-                            {{ $school->official_name }}
-                        </flux:link>
+                        @if($school->campaign_id)
+                            <flux:link href="{{ route('campaigns.schools.structures', [$school->campaign, $school]) }}" wire:navigate class="font-medium hover:underline">
+                                {{ $school->official_name }}
+                            </flux:link>
+                        @else
+                            <span class="font-medium">{{ $school->official_name }}</span>
+                        @endif
                     </flux:table.cell>
                     <flux:table.cell>{{ Str::limit($school->address, 30) }}</flux:table.cell>
                     <flux:table.cell>{{ $school->campaign?->name }}</flux:table.cell>
@@ -41,7 +45,11 @@
 
                             <flux:menu>
                                 <flux:menu.item icon="pencil" wire:click="edit('{{ $school->id }}')">{{ __('Edit') }}</flux:menu.item>
-                                <flux:menu.item icon="building-office-2" href="{{ route('schools.structures', $school) }}" wire:navigate>{{ __('Manage Structures') }}</flux:menu.item>
+                                @if($school->campaign_id)
+                                    <flux:menu.item icon="building-office-2" href="{{ route('campaigns.schools.structures', [$school->campaign, $school]) }}" wire:navigate>{{ __('Manage Structures') }}</flux:menu.item>
+                                @else
+                                    <flux:menu.item icon="building-office-2" href="{{ route('schools.structures', $school) }}" wire:navigate>{{ __('Manage Structures') }}</flux:menu.item>
+                                @endif
                                 <flux:menu.item icon="trash" variant="danger" wire:click="delete('{{ $school->id }}')" wire:confirm="{{ __('Are you sure?') }}">
                                     {{ __('Delete') }}
                                 </flux:menu.item>
@@ -96,6 +104,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <flux:input wire:model="contact_person" label="{{ __('Contact Person') }}" placeholder="{{ __('Person to contact') }}" />
                 <flux:input wire:model="contact_phone" label="{{ __('Contact Phone') }}" placeholder="{{ __('Phone number') }}" type="tel" />
+                <flux:input wire:model="contact_email" label="{{ __('Contact email') }}" placeholder="email@example.com" type="email" class="sm:col-span-2" />
             </div>
 
             <div class="flex pt-2">

@@ -44,7 +44,7 @@ class PdfGeneratorService
             'margin_top' => 8,
             'margin_bottom' => 8,
             'margin_header' => 8,
-            'margin_footer' => 8
+            'margin_footer' => 8,
         ];
 
         if (! empty($options['gdpr_fonts'])) {
@@ -172,8 +172,8 @@ class PdfGeneratorService
         foreach ($school->groups()->with('children')->get() as $group) {
             foreach ($group->children as $child) {
                 $html .= '<tr>
-                    <td>' . htmlspecialchars($child->child_full_name) . '</td>
-                    <td>' . htmlspecialchars($child->parent_full_name) . '</td>
+                    <td>'.htmlspecialchars($child->child_full_name).'</td>
+                    <td>'.htmlspecialchars($child->parent_full_name).'</td>
                 </tr>';
             }
         }
@@ -187,6 +187,7 @@ class PdfGeneratorService
 
     /**
      * Generate distribution table for a single group (child, parent, signature) as PDF.
+     *
      * @return array{content: string, mime: string, extension: string}
      */
     public function generateGroupDistributionTable(Group $group): array
@@ -263,6 +264,64 @@ class PdfGeneratorService
     }
 
     /**
+     * Generate "Proces verbal de Retur" PDF (return of kits to project).
+     *
+     * @return array{content: string, mime: string, extension: string}
+     */
+    public function generateProcesVerbalRetur(School $school, int $kitsCount): array
+    {
+        $campaign = $school->campaign;
+        $html = View::make('proces-verbal-retur', [
+            'school_name' => $school->official_name ?? '',
+            'campaign_name' => $campaign?->name ?? '',
+            'facilitator' => $campaign?->facilitator_name ?? '',
+            'date' => now()->format('d.m.Y'),
+            'kits_count' => $kitsCount,
+            'address' => $school->address ?? '',
+            'city' => $school->city ?? '',
+            'state' => $school->state ?? '',
+        ])->render();
+
+        $mpdf = $this->createMpdf();
+        $mpdf->WriteHTML($html);
+
+        return [
+            'content' => $mpdf->Output('', 'S'),
+            'mime' => 'application/pdf',
+            'extension' => 'pdf',
+        ];
+    }
+
+    /**
+     * Generate "Proces verbal de primire din retur" PDF (receipt of kits from return).
+     *
+     * @return array{content: string, mime: string, extension: string}
+     */
+    public function generateProcesVerbalPrimireDinRetur(School $school, int $kitsCount): array
+    {
+        $campaign = $school->campaign;
+        $html = View::make('proces-verbal-primire-din-retur', [
+            'school_name' => $school->official_name ?? '',
+            'campaign_name' => $campaign?->name ?? '',
+            'facilitator' => $campaign?->facilitator_name ?? '',
+            'date' => now()->format('d.m.Y'),
+            'kits_count' => $kitsCount,
+            'address' => $school->address ?? '',
+            'city' => $school->city ?? '',
+            'state' => $school->state ?? '',
+        ])->render();
+
+        $mpdf = $this->createMpdf();
+        $mpdf->WriteHTML($html);
+
+        return [
+            'content' => $mpdf->Output('', 'S'),
+            'mime' => 'application/pdf',
+            'extension' => 'pdf',
+        ];
+    }
+
+    /**
      * Generate distribution table from Word template.
      * Template placeholders: ${SCHOOL_NAME}, ${STRUCTURE_NAME}, ${GROUP_NAME}, ${EDUCATOR_NAME}
      * Use a table with rows. Clone row for each child. Placeholders in row: ${CHILD_NAME}, ${PARENT_NAME}
@@ -283,15 +342,15 @@ class PdfGeneratorService
         $count = max(1, $childCount + 10); // All children + 10 empty rows
         $template->cloneRow('CHILD_NAME', $count);
         foreach ($children as $i => $child) {
-            $template->setValue('CHILD_NAME#' . ($i + 1), $child->child_full_name);
-            $template->setValue('PARENT_NAME#' . ($i + 1), $child->parent_full_name);
+            $template->setValue('CHILD_NAME#'.($i + 1), $child->child_full_name);
+            $template->setValue('PARENT_NAME#'.($i + 1), $child->parent_full_name);
         }
         for ($i = $childCount + 1; $i <= $count; $i++) {
-            $template->setValue('CHILD_NAME#' . $i, '');
-            $template->setValue('PARENT_NAME#' . $i, '');
+            $template->setValue('CHILD_NAME#'.$i, '');
+            $template->setValue('PARENT_NAME#'.$i, '');
         }
 
-        $tmpFile = storage_path('app/tmp/distribution_' . $group->id . '_' . time() . '.docx');
+        $tmpFile = storage_path('app/tmp/distribution_'.$group->id.'_'.time().'.docx');
         $template->saveAs($tmpFile);
 
         $content = file_get_contents($tmpFile);
@@ -327,7 +386,7 @@ class PdfGeneratorService
         $qrPath = storage_path('app/templates/qr.png');
         $qrSrc = '';
         if (is_file($qrPath)) {
-            $qrSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($qrPath));
+            $qrSrc = 'data:image/png;base64,'.base64_encode(file_get_contents($qrPath));
         }
 
         foreach ($childrenArray as $index => $child) {
@@ -375,6 +434,7 @@ class PdfGeneratorService
 
         if (empty($children)) {
             $mpdf->WriteHTML('<p>No children to generate GDPR forms.</p>');
+
             return $mpdf->Output('', 'S');
         }
 
@@ -384,13 +444,13 @@ class PdfGeneratorService
             $parentName = $withParentNames ? $child->parent_full_name : '_________________________';
 
             $html = '<h2>CONSIMȚĂMÂNT GDPR</h2>
-            <p>Școala: ' . htmlspecialchars($school->official_name) . '</p>
-            <p>Structura: ' . htmlspecialchars($structure->name) . '</p>
-            <p>Grupa: ' . htmlspecialchars($group->name) . '</p>
-            <p>Educator: ' . htmlspecialchars($group->educator_name ?? '') . '</p>
-            <p>Copil: ' . htmlspecialchars($child->child_full_name) . '</p>
-            <p>Părinte/Tutore: ' . htmlspecialchars($parentName) . '</p>
-            <p>Facilitator: ' . htmlspecialchars($campaign->facilitator_name ?? '') . ' ' . htmlspecialchars($campaign->month_year_suffix ?? '') . '</p>
+            <p>Școala: '.htmlspecialchars($school->official_name).'</p>
+            <p>Structura: '.htmlspecialchars($structure->name).'</p>
+            <p>Grupa: '.htmlspecialchars($group->name).'</p>
+            <p>Educator: '.htmlspecialchars($group->educator_name ?? '').'</p>
+            <p>Copil: '.htmlspecialchars($child->child_full_name).'</p>
+            <p>Părinte/Tutore: '.htmlspecialchars($parentName).'</p>
+            <p>Facilitator: '.htmlspecialchars($campaign->facilitator_name ?? '').' '.htmlspecialchars($campaign->month_year_suffix ?? '').'</p>
             <p style="margin-top:40px">Semnătură: _________________________ Data: _________________________</p>';
 
             $mpdf->WriteHTML($html);

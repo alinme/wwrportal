@@ -22,7 +22,11 @@
         <flux:table.rows>
             @foreach ($campaigns as $campaign)
                 <flux:table.row :key="$campaign->id">
-                    <flux:table.cell>{{ $campaign->name }}</flux:table.cell>
+                    <flux:table.cell>
+                        <flux:link href="{{ route('campaigns.schools', $campaign) }}" wire:navigate class="font-medium hover:underline">
+                            {{ $campaign->name }}
+                        </flux:link>
+                    </flux:table.cell>
                     <flux:table.cell>{{ $campaign->facilitator_name }}</flux:table.cell>
                     <flux:table.cell>{{ $campaign->month_year_suffix }}</flux:table.cell>
                     <flux:table.cell>{{ $campaign->target_kits }}</flux:table.cell>
@@ -36,6 +40,7 @@
                             <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" />
 
                             <flux:menu>
+                                <flux:menu.item icon="academic-cap" href="{{ route('campaigns.schools', $campaign) }}" wire:navigate>{{ __('Schools') }}</flux:menu.item>
                                 <flux:menu.item icon="pencil" wire:click="edit({{ $campaign->id }})">{{ __('Edit') }}</flux:menu.item>
                                 <flux:menu.item icon="trash" variant="danger" wire:click="delete({{ $campaign->id }})" wire:confirm="{{ __('Are you sure?') }}">
                                     {{ __('Delete') }}

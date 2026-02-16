@@ -2,9 +2,13 @@
     <div class="text-center space-y-2">
         <flux:heading size="xl">{{ $school->official_name }}</flux:heading>
         <flux:subheading>{{ $school->address }}</flux:subheading>
-        @if($school->contact_person || $school->contact_phone)
+        @if($school->contact_person || $school->contact_phone || $school->contact_email)
             <flux:text class="text-sm text-zinc-500">
-                {{ $school->contact_person }}{{ $school->contact_person && $school->contact_phone ? ' • ' : '' }}{{ $school->contact_phone }}
+                @if($school->contact_person){{ $school->contact_person }}@endif
+                @if($school->contact_person && ($school->contact_phone || $school->contact_email)) • @endif
+                @if($school->contact_phone){{ $school->contact_phone }}@endif
+                @if($school->contact_phone && $school->contact_email) • @endif
+                @if($school->contact_email)<a href="mailto:{{ $school->contact_email }}" class="hover:underline">{{ $school->contact_email }}</a>@endif
             </flux:text>
         @endif
 

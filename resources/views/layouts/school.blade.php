@@ -22,6 +22,19 @@
         <div class="min-h-full flex flex-col">
             <header class="bg-white dark:bg-zinc-800 shadow-sm border-b border-zinc-200 dark:border-zinc-700">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    @auth
+                        @php $portalSchool = request()->route('school'); @endphp
+                        @if(auth()->user()->hasRole('admin') && session('impersonate_school_id') && $portalSchool)
+                            <div class="bg-amber-100 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2 flex items-center justify-between gap-4">
+                                <span class="text-sm text-amber-800 dark:text-amber-200">
+                                    {{ __('Impersonating') }}: <strong>{{ $portalSchool->official_name }}</strong>
+                                </span>
+                                <a href="{{ route('exit-impersonation') }}" class="text-sm font-medium text-amber-800 dark:text-amber-200 hover:underline shrink-0">
+                                    {{ __('Exit to admin dashboard') }} →
+                                </a>
+                            </div>
+                        @endif
+                    @endauth
                     <div class="flex h-16 justify-between items-center">
                         <div class="flex items-center gap-4">
                             @if($logo = \App\Models\Foundation::first()?->logo_path)

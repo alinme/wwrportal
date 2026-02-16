@@ -1,7 +1,11 @@
 <div class="flex flex-col gap-6">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <flux:button size="sm" variant="ghost" icon="arrow-left" href="{{ route('schools') }}" wire:navigate><span class="hidden sm:inline">{{ __('Back') }}</span></flux:button>
+            @if(isset($campaign) && $campaign)
+                <flux:button size="sm" variant="ghost" icon="arrow-left" href="{{ route('campaigns.schools', $campaign) }}" wire:navigate><span class="hidden sm:inline">{{ __('Back') }}</span></flux:button>
+            @else
+                <flux:button size="sm" variant="ghost" icon="arrow-left" href="{{ route('schools') }}" wire:navigate><span class="hidden sm:inline">{{ __('Back') }}</span></flux:button>
+            @endif
             <flux:heading size="xl">{{ __('Structures') }}</flux:heading>
         </div>
         <flux:modal.trigger name="structure-modal">
@@ -14,11 +18,13 @@
             <div class="space-y-2">
                 <flux:heading size="lg">{{ $school->official_name }}</flux:heading>
                 <flux:text class="text-zinc-500 dark:text-zinc-400">{{ $school->address }}</flux:text>
-                @if ($school->contact_person || $school->contact_phone)
+                @if ($school->contact_person || $school->contact_phone || $school->contact_email)
                     <flux:text class="text-sm">
                         @if ($school->contact_person){{ $school->contact_person }}@endif
-                        @if ($school->contact_person && $school->contact_phone) · @endif
+                        @if ($school->contact_person && ($school->contact_phone || $school->contact_email)) · @endif
                         @if ($school->contact_phone){{ $school->contact_phone }}@endif
+                        @if ($school->contact_phone && $school->contact_email) · @endif
+                        @if ($school->contact_email)<a href="mailto:{{ $school->contact_email }}" class="text-zinc-600 dark:text-zinc-400 hover:underline">{{ $school->contact_email }}</a>@endif
                     </flux:text>
                 @endif
                 <flux:text class="text-sm">{{ __('Campaign') }}: {{ $school->campaign?->name }}</flux:text>
@@ -46,6 +52,24 @@
                 <span class="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{{ $total_target_kits }}</span>
                 <span class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Target kits') }}</span>
             </div>
+        </div>
+    </flux:card>
+
+    <flux:card>
+        <flux:heading size="lg">{{ __('Retur / Primire din retur') }}</flux:heading>
+        <flux:subheading>{{ __('When the actual number of children differs from the order: record kits returned (retur) or received from return (primire din retur), then generate the official documents.') }}</flux:subheading>
+        <form wire:submit="saveReturPrimire" class="mt-4 flex flex-wrap items-end gap-4">
+            <flux:input wire:model="kits_returned" type="number" min="0" label="{{ __('Kits returned (Retur)') }}" placeholder="0" class="w-32" />
+            <flux:input wire:model="kits_received_from_return" type="number" min="0" label="{{ __('Kits received from return (Primire din retur)') }}" placeholder="0" class="w-32" />
+            <flux:button type="submit" size="sm" variant="primary">{{ __('Save') }}</flux:button>
+        </form>
+        <div class="mt-4 flex flex-wrap gap-2">
+            <flux:button size="sm" variant="outline" href="{{ route('schools.docs.proces-verbal-retur', $school) }}" target="_blank">
+                {{ __('Generate Proces verbal de Retur') }}
+            </flux:button>
+            <flux:button size="sm" variant="outline" href="{{ route('schools.docs.proces-verbal-primire-din-retur', $school) }}" target="_blank">
+                {{ __('Generate Proces verbal de primire din retur') }}
+            </flux:button>
         </div>
     </flux:card>
 

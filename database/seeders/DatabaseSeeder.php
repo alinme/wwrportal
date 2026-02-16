@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
                 'password' => bcrypt('PParolamea00'),
                 'role' => 'admin',
                 'job_title' => 'Facilitator',
-            ]
+            ],
         );
         if (! $admin->hasRole('admin')) {
             $admin->assignRole('admin');
@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
 
         Foundation::firstOrCreate(
             ['name' => 'World Vision Romania'],
-            ['details' => 'Start in Educatie Program']
+            ['details' => 'Program “Start in Educatie”'],
         );
 
         $this->seedSampleSchool();
@@ -58,7 +58,7 @@ class DatabaseSeeder extends Seeder
                 'month_year_suffix' => '.03.2026',
                 'target_kits' => 600,
                 'is_active' => true,
-            ]
+            ],
         );
 
         $school = School::firstOrCreate(
@@ -72,10 +72,11 @@ class DatabaseSeeder extends Seeder
                 'country' => 'Romania',
                 'contact_person' => 'Maria Popescu',
                 'contact_phone' => '0268 123 456',
+                'contact_email' => null,
                 'latitude' => 45.6427,
                 'longitude' => 25.5887,
                 'target_kits' => 0,
-            ]
+            ],
         );
 
         $structuresWithGroups = [
@@ -138,10 +139,12 @@ class DatabaseSeeder extends Seeder
                 [
                     'address' => $structData['address'],
                     'target_kits' => 0,
-                ]
+                ],
             );
 
-            foreach ($structData['groups'] as [$groupName, $educatorName, $contactPhone]) {
+            foreach (
+                $structData['groups'] as [$groupName, $educatorName, $contactPhone]
+            ) {
                 $group = Group::firstOrCreate(
                     [
                         'structure_id' => $structure->id,
@@ -151,12 +154,13 @@ class DatabaseSeeder extends Seeder
                         'educator_name' => $educatorName,
                         'contact_phone' => $contactPhone,
                         'target_kits' => 0,
-                    ]
+                    ],
                 );
 
                 $numChildren = random_int(3, 6);
                 for ($c = 0; $c < $numChildren; $c++) {
-                    $entry = $childrenPool[$childPoolIndex % count($childrenPool)];
+                    $entry =
+                        $childrenPool[$childPoolIndex % count($childrenPool)];
                     $childPoolIndex++;
                     $childFullName = strtoupper($entry[0].' '.$entry[1]);
                     $parentFullName = $entry[2];
@@ -168,7 +172,7 @@ class DatabaseSeeder extends Seeder
                         [
                             'parent_full_name' => $parentFullName,
                             'gdpr_status' => true,
-                        ]
+                        ],
                     );
                 }
             }

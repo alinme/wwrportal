@@ -79,13 +79,13 @@ class SchoolDocsController extends Controller
         $pdfContent = $this->pdfService->generateGdpr($school, $campaign, $children, $withParentNames);
 
         $suffix = $withParentNames ? 'cu_nume' : 'fara_nume';
-        $filename = 'gdpr_consimtamant_' . $suffix . '_' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'gdpr_consimtamant_'.$suffix.'_'.now()->format('Y-m-d').'.pdf';
 
         $disposition = request()->boolean('preview') ? 'inline' : 'attachment';
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', $disposition . '; filename="' . $filename . '"');
+            ->header('Content-Disposition', $disposition.'; filename="'.$filename.'"');
     }
 
     /**
@@ -103,14 +103,14 @@ class SchoolDocsController extends Controller
         $withParentNames = filter_var(request('with_parent_names', true), FILTER_VALIDATE_BOOLEAN);
         $pdfContent = $this->pdfService->generateGdpr($school, $campaign, [$child], $withParentNames);
 
-        $slug = Str::slug($child->child_full_name . '_' . $child->parent_full_name);
-        $filename = 'gdpr_' . $slug . '_' . now()->format('Y-m-d') . '.pdf';
+        $slug = Str::slug($child->child_full_name.'_'.$child->parent_full_name);
+        $filename = 'gdpr_'.$slug.'_'.now()->format('Y-m-d').'.pdf';
 
         $disposition = request()->boolean('preview') ? 'inline' : 'attachment';
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', $disposition . '; filename="' . $filename . '"');
+            ->header('Content-Disposition', $disposition.'; filename="'.$filename.'"');
     }
 
     /**
@@ -127,10 +127,11 @@ class SchoolDocsController extends Controller
         $withParentNames = filter_var(request('with_parent_names', true), FILTER_VALIDATE_BOOLEAN);
         $pdfContent = $this->pdfService->generateGdpr($school, $campaign, [$child], $withParentNames);
 
-        $filename = 'gdpr_test_' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'gdpr_test_'.now()->format('Y-m-d').'.pdf';
+
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 
     public function downloadGroupDistributionTable(School $school, Group $group)
@@ -138,7 +139,7 @@ class SchoolDocsController extends Controller
         $this->authorizeGroupAccess($school, $group);
 
         $result = $this->pdfService->generateGroupDistributionTable($group);
-        $filename = 'lista_distributie_' . Str::slug($group->name) . '_' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'lista_distributie_'.Str::slug($group->name).'_'.now()->format('Y-m-d').'.pdf';
 
         $disposition = request()->boolean('preview')
             ? 'inline'
@@ -146,7 +147,43 @@ class SchoolDocsController extends Controller
 
         return response($result['content'])
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', $disposition . '; filename="' . $filename . '"');
+            ->header('Content-Disposition', $disposition.'; filename="'.$filename.'"');
+    }
+
+    /**
+     * Download "Proces verbal de Retur" (return of kits). Admin only.
+     */
+    public function downloadProcesVerbalRetur(School $school)
+    {
+        $kits = (int) ($school->kits_returned ?? 0);
+        if ($kits < 1) {
+            abort(422, __('Set the number of kits returned (Retur) for this school first, then generate the document.'));
+        }
+
+        $result = $this->pdfService->generateProcesVerbalRetur($school, $kits);
+        $filename = 'proces_verbal_retur_'.Str::slug($school->official_name).'_'.now()->format('Y-m-d').'.pdf';
+
+        return response($result['content'])
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    }
+
+    /**
+     * Download "Proces verbal de primire din retur" (receipt of kits from return). Admin only.
+     */
+    public function downloadProcesVerbalPrimireDinRetur(School $school)
+    {
+        $kits = (int) ($school->kits_received_from_return ?? 0);
+        if ($kits < 1) {
+            abort(422, __('Set the number of kits received from return (Primire din retur) for this school first, then generate the document.'));
+        }
+
+        $result = $this->pdfService->generateProcesVerbalPrimireDinRetur($school, $kits);
+        $filename = 'proces_verbal_primire_din_retur_'.Str::slug($school->official_name).'_'.now()->format('Y-m-d').'.pdf';
+
+        return response($result['content'])
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 
     protected function authorizeGroupAccess(School $school, Group $group): void

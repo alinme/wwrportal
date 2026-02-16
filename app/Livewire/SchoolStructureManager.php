@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Campaign;
 use App\Models\School;
 use App\Models\Structure;
 use Flux\Flux;
@@ -13,6 +14,9 @@ class SchoolStructureManager extends Component
 {
     public School $school;
 
+    /** When set, we were opened from campaign → schools (back goes to campaign schools). */
+    public ?Campaign $campaign = null;
+
     public string $name = '';
 
     public int $target_kits = 0;
@@ -21,9 +25,29 @@ class SchoolStructureManager extends Component
 
     public ?string $structure_id = null;
 
-    public function mount(School $school): void
+    public int $kits_returned = 0;
+
+    public int $kits_received_from_return = 0;
+
+    public function mount(School $school, ?Campaign $campaign = null): void
     {
         $this->school = $school;
+        $this->campaign = $campaign;
+        $this->kits_returned = (int) ($school->kits_returned ?? 0);
+        $this->kits_received_from_return = (int) ($school->kits_received_from_return ?? 0);
+    }
+
+    public function saveReturPrimire(): void
+    {
+        $this->validate([
+            'kits_returned' => 'required|integer|min:0',
+            'kits_received_from_return' => 'required|integer|min:0',
+        ]);
+        $this->school->update([
+            'kits_returned' => $this->kits_returned,
+            'kits_received_from_return' => $this->kits_received_from_return,
+        ]);
+        Flux::toast(__('Saved.'), 'success');
     }
 
     public function save(): void
@@ -99,6 +123,7 @@ class SchoolStructureManager extends Component
             'groups_count' => $groupsCount,
             'children_count' => $childrenCount,
             'total_target_kits' => (int) $totalTargetKits,
+            'campaign' => $this->campaign,
         ]);
     }
 }
